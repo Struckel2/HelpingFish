@@ -80,7 +80,24 @@ window.addEventListener('keydown', (e) => {
 // ============================================================
 // FULLSCREEN + LANDSCAPE SUPPORT
 // ============================================================
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function isPWA() {
+  return window.navigator.standalone === true || 
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches;
+}
+
+function isFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
 function requestFullscreen() {
+  if (isIOS()) return; // iOS doesn't support Fullscreen API
+  
   const el = document.documentElement;
   if (el.requestFullscreen) {
     el.requestFullscreen().catch(() => {});
@@ -91,6 +108,44 @@ function requestFullscreen() {
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('landscape').catch(() => {});
   }
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
+// Auto-fullscreen when rotating to landscape (Android)
+function setupOrientationListener() {
+  if (isIOS()) return; // Skip for iOS
+  
+  // Use screen.orientation API if available
+  if (screen.orientation) {
+    screen.orientation.addEventListener('change', () => {
+      const type = screen.orientation.type;
+      if (type.includes('landscape') && !isFullscreen()) {
+        requestFullscreen();
+      } else if (type.includes('portrait') && isFullscreen()) {
+        exitFullscreen();
+      }
+    });
+  }
+  
+  // Fallback: listen for resize
+  window.addEventListener('resize', () => {
+    if (W > H && !isFullscreen() && 'ontouchstart' in window) {
+      requestFullscreen();
+    }
+  });
+}
+
+// Show iOS install hint (only once per session)
+let iosHintShown = false;
+function shouldShowIOSHint() {
+  return isIOS() && !isPWA() && !iosHintShown;
 }
 
 // ============================================================
@@ -107,6 +162,7 @@ async function init() {
   
   initInput();
   initAmbientBubbles();
+  setupOrientationListener();
   
   game.state = 'title';
   lastTime = performance.now();

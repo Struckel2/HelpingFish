@@ -668,6 +668,14 @@ function renderTitleScreen() {
   ctx.strokeText(startText, W/2, H * 0.82);
   ctx.fillText(startText, W/2, H * 0.82);
   
+  // iOS PWA hint (only if on iOS and not installed as PWA)
+  if (typeof shouldShowIOSHint === 'function' && shouldShowIOSHint()) {
+    const hintSize = Math.max(10, Math.min(W * 0.025, 14 * scale));
+    ctx.font = `${hintSize}px Arial`;
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText('📱 Para tela cheia no iPhone: toque em ⬆️ e "Adicionar à Tela Inicial"', W/2, H * 0.92);
+  }
+  
   ctx.restore();
 }
 
