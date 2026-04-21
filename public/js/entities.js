@@ -432,13 +432,25 @@ game.playerBumped = function(boss) {
   p.vx = (dx / d) * 350;
   p.vy = (dy / d) * 250;
   
-  // Lose 1-2 followers
-  const lose = Math.min(this.followers.length, randInt(1, 2));
-  for (let i = 0; i < lose; i++) {
-    const f = this.followers.pop();
-    if (f) {
-      // Scatter the lost follower
-      spawnBubbles(f.x, f.y, 3);
+  if (this.followers.length > 0) {
+    // Lose 1-2 followers
+    const lose = Math.min(this.followers.length, randInt(1, 2));
+    for (let i = 0; i < lose; i++) {
+      const f = this.followers.pop();
+      if (f) {
+        spawnBubbles(f.x, f.y, 3);
+      }
+    }
+  } else {
+    // No followers — lose a life!
+    p.lives--;
+    spawnStars(p.x, p.y, 8);
+    
+    if (p.lives <= 0) {
+      // GAME OVER!
+      this.state = 'gameover';
+      this.gameOverTime = this.time;
+      return;
     }
   }
   
@@ -556,7 +568,7 @@ game.manageSpawns = function(dt) {
   }
   
   // Boss spawning
-  if (this.time - this.lastBossSpawn > diff.bossInterval && this.time > 8) {
+  if (this.time - this.lastBossSpawn > diff.bossInterval && this.time > BOSS_FIRST_SPAWN_DELAY) {
     this.spawnBoss();
     this.lastBossSpawn = this.time;
   }

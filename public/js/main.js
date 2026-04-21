@@ -40,18 +40,27 @@ function gameLoop(timestamp) {
     canvas.height = window.innerHeight;
     W = canvas.width;
     H = canvas.height;
-    input.fixedX = Math.min(100, W * 0.15);
-    input.fixedY = H - Math.min(120, H * 0.18);
+    input.fixedX = Math.max(90, W * 0.12);
+    input.fixedY = H - Math.max(90, H * 0.15);
   }
   
   ctx.clearRect(0, 0, W, H);
   
-  if (game.state === 'title') {
+  // Show landscape reminder if in portrait on mobile
+  if (W < H && ('ontouchstart' in window)) {
+    renderLandscapeReminder();
+  } else if (game.state === 'title') {
     updateAmbientBubbles(dt);
     renderTitleScreen();
   } else if (game.state === 'playing') {
     game.update(dt);
     game.render();
+  } else if (game.state === 'gameover') {
+    // Keep rendering the game world frozen + overlay
+    updateAmbientBubbles(dt);
+    updateParticles(dt);
+    game.render();
+    renderGameOverScreen();
   }
   
   requestAnimationFrame(gameLoop);
@@ -63,8 +72,26 @@ function gameLoop(timestamp) {
 window.addEventListener('keydown', (e) => {
   if (game.state === 'title') {
     game.startGame();
+  } else if (game.state === 'gameover') {
+    game.startGame();
   }
 });
+
+// ============================================================
+// FULLSCREEN + LANDSCAPE SUPPORT
+// ============================================================
+function requestFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) {
+    el.requestFullscreen().catch(() => {});
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  }
+  // Try to lock orientation to landscape
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {});
+  }
+}
 
 // ============================================================
 // INITIALIZATION

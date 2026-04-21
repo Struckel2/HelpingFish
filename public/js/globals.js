@@ -10,7 +10,7 @@ let W, H;
 // GAME STATE
 // ============================================================
 const game = {
-  state: 'loading', // loading, title, playing
+  state: 'loading', // loading, title, playing, gameover
   time: 0,
   fishSaved: 0,
   bossesDefeated: 0,
@@ -54,6 +54,8 @@ const game = {
       healProgress: 0,
       healTime: 0,
       bobOffset: 0,
+      lives: 3,
+      maxLives: 3,
     };
     
     this.camera.x = 0;

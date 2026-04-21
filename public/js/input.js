@@ -21,9 +21,15 @@ const input = {
 };
 
 function initInput() {
-  // Fixed joystick position (bottom-left)
-  input.fixedX = 100;
-  input.fixedY = H - 120;
+  // Fixed joystick position (bottom-left, proportional to screen)
+  input.fixedX = Math.max(90, W * 0.12);
+  input.fixedY = H - Math.max(90, H * 0.15);
+  
+  // Scale joystick size for mobile
+  if (W < 800) {
+    input.baseRadius = Math.max(45, Math.min(65, W * 0.09));
+    input.knobRadius = Math.max(18, Math.min(28, W * 0.04));
+  }
   
   // Touch events
   canvas.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -43,7 +49,18 @@ function initInput() {
 
 function onTouchStart(e) {
   e.preventDefault();
-  if (game.state === 'title') { game.startGame(); return; }
+  
+  if (game.state === 'title') {
+    requestFullscreen();
+    game.startGame();
+    return;
+  }
+  
+  if (game.state === 'gameover') {
+    game.startGame();
+    return;
+  }
+  
   for (const touch of e.changedTouches) {
     const rect = canvas.getBoundingClientRect();
     const tx = (touch.clientX - rect.left) * (W / rect.width);
@@ -87,6 +104,8 @@ function onTouchEnd(e) {
 
 function onMouseDown(e) {
   if (game.state === 'title') { game.startGame(); return; }
+  if (game.state === 'gameover') { game.startGame(); return; }
+  
   const rect = canvas.getBoundingClientRect();
   const mx = (e.clientX - rect.left) * (W / rect.width);
   const my = (e.clientY - rect.top) * (H / rect.height);
