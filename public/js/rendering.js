@@ -668,13 +668,88 @@ function renderTitleScreen() {
   ctx.strokeText(startText, W/2, H * 0.82);
   ctx.fillText(startText, W/2, H * 0.82);
   
-  // iOS PWA hint (only if on iOS and not installed as PWA)
+  // iOS PWA install tutorial (only if on iOS and not installed as PWA)
   if (typeof shouldShowIOSHint === 'function' && shouldShowIOSHint()) {
-    const hintSize = Math.max(10, Math.min(W * 0.025, 14 * scale));
-    ctx.font = `${hintSize}px Arial`;
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.fillText('📱 Para tela cheia no iPhone: toque em ⬆️ e "Adicionar à Tela Inicial"', W/2, H * 0.92);
+    renderIOSInstallHint(scale);
   }
+  
+  ctx.restore();
+}
+
+// ============================================================
+// iOS PWA INSTALL TUTORIAL
+// ============================================================
+function renderIOSInstallHint(scale) {
+  const boxW = Math.min(W * 0.9, 420 * scale);
+  const boxH = Math.max(70, 90 * scale);
+  const boxX = W / 2 - boxW / 2;
+  const boxY = H * 0.88 - boxH / 2;
+  
+  // Animated glow border
+  const glowAlpha = 0.5 + Math.sin(Date.now() * 0.004) * 0.3;
+  
+  // Background box
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 40, 100, 0.85)';
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, 14 * scale);
+  ctx.fill();
+  
+  // Glow border
+  ctx.strokeStyle = `rgba(79, 195, 247, ${glowAlpha})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, 14 * scale);
+  ctx.stroke();
+  
+  ctx.textAlign = 'center';
+  
+  // Title
+  const titleSize = Math.max(11, Math.floor(14 * scale));
+  ctx.font = `bold ${titleSize}px Arial`;
+  ctx.fillStyle = '#FFEB3B';
+  ctx.fillText('📱 Para tela cheia no iPhone:', W / 2, boxY + titleSize + 8);
+  
+  // Steps - laid out horizontally
+  const stepSize = Math.max(10, Math.floor(12 * scale));
+  const stepY = boxY + titleSize + 8 + stepSize + 12;
+  const stepSpacing = boxW / 3;
+  const startX = boxX + stepSpacing / 2;
+  
+  ctx.font = `${stepSize}px Arial`;
+  ctx.fillStyle = '#E1F5FE';
+  
+  // Step 1
+  const emojiSize = Math.max(16, Math.floor(22 * scale));
+  ctx.font = `${emojiSize}px Arial`;
+  ctx.fillText('⬆️', startX, stepY - 2);
+  ctx.font = `${stepSize}px Arial`;
+  ctx.fillText('Compartilhar', startX, stepY + stepSize + 6);
+  
+  // Arrow 1→2
+  ctx.fillStyle = '#4FC3F7';
+  ctx.font = `${Math.max(14, 18 * scale)}px Arial`;
+  ctx.fillText('→', startX + stepSpacing * 0.5, stepY);
+  
+  // Step 2
+  ctx.fillStyle = '#E1F5FE';
+  ctx.font = `${emojiSize}px Arial`;
+  ctx.fillText('➕', startX + stepSpacing, stepY - 2);
+  ctx.font = `${stepSize}px Arial`;
+  ctx.fillText('Tela Inicial', startX + stepSpacing, stepY + stepSize + 6);
+  
+  // Arrow 2→3
+  ctx.fillStyle = '#4FC3F7';
+  ctx.font = `${Math.max(14, 18 * scale)}px Arial`;
+  ctx.fillText('→', startX + stepSpacing * 1.5, stepY);
+  
+  // Step 3
+  ctx.fillStyle = '#E1F5FE';
+  ctx.font = `${emojiSize}px Arial`;
+  ctx.fillText('🐟', startX + stepSpacing * 2, stepY - 2);
+  ctx.font = `${stepSize}px Arial`;
+  ctx.fillStyle = '#81C784';
+  ctx.fillText('Tela cheia!', startX + stepSpacing * 2, stepY + stepSize + 6);
   
   ctx.restore();
 }
