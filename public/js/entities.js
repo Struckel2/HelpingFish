@@ -580,7 +580,9 @@ game.manageSpawns = function(dt) {
 game.updateCamera = function() {
   const p = this.player;
   this.camera.x = lerp(this.camera.x, p.x, 0.08);
-  this.camera.y = lerp(this.camera.y, p.y - H * 0.1, 0.05);
+  // Offset keeps the player centered vertically (more on small screens)
+  const yOffset = Math.max(H * 0.3, PLAYER_SIZE + 20);
+  this.camera.y = lerp(this.camera.y, p.y - yOffset, 0.10);
   // Clamp camera vertically to keep world in view
   this.camera.y = clamp(this.camera.y, 0, WORLD_HEIGHT - H);
 };

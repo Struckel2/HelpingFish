@@ -59,7 +59,9 @@ const game = {
     };
     
     this.camera.x = 0;
-    this.camera.y = WORLD_HEIGHT / 2 - H / 2;
+    // Start camera aligned with player position
+    const yOffset = Math.max(H * 0.3, PLAYER_SIZE + 20);
+    this.camera.y = clamp(this.player.y - yOffset, 0, WORLD_HEIGHT - H);
     
     // Initial decorations
     this.decoLeftBound = -W;
